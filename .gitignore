@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 .idea
 venv
+paper_butler/db.sqlite3
+*/migrations/
 # C extensions
 *.so
 
