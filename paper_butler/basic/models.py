@@ -5,6 +5,7 @@ from django.db import models
 
 class Invoice(models.Model):
     upload_date_time = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='documents/', null=False, blank=False)
     deadline_date = models.DateTimeField()
     price = models.FloatField()
     name_of_invoicer = models.CharField(max_length=100)
@@ -13,6 +14,7 @@ class Invoice(models.Model):
 
 class Receipt(models.Model):
     upload_date_time = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='receipts/', null=False, blank=False)
     buying_date = models.DateTimeField()
     name_of_article = models.CharField(max_length=100)
     name_of_store = models.CharField(max_length=100)
