@@ -5,7 +5,8 @@ __pycache__/
 .idea
 venv
 paper_butler/db.sqlite3
-*/migrations/
+migrations/
+media
 # C extensions
 *.so
 
