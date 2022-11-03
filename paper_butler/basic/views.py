@@ -48,7 +48,11 @@ def upload_receipt(request):
         form = UploadReceiptForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-        return receipts_overview(request)
+        return redirect("receipts")
     else:
         form = UploadReceiptForm
     return render(request, 'basic/upload.html', {'form': form})
+
+
+def index(request):
+    return render(request, "basic/index.html")

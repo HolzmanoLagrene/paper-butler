@@ -11,6 +11,14 @@ class UploadInvoiceForm(forms.ModelForm):
         widgets = {
             'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'})
         }
+
+class UploadForm(forms.ModelForm):
+    class Meta:
+        fields = ('type', 'deadline_date', 'price', 'name_of_invoicer', 'payed')
+        widgets = {
+            'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'})
+        }
+
 class UploadReceiptForm(forms.ModelForm):
     class Meta:
         model = Receipt
