@@ -6,8 +6,11 @@ from django_serverside_datatable.views import ServerSideDatatableView
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
 
-from basic.forms import UploadInvoiceForm, UploadReceiptForm
-from basic.models import Invoice, Receipt
+from basic.forms import UploadFileForm, DocumentSpecificationForm
+from basic.models import Invoice, Receipt, UploadFile, DocumentType, UploadedDocument
+from image_processing.image_handler import ImageHandler
+from image_processing.utils import FileType
+from utils.utils import get_human_readable_id
 
 
 class InvoiceListView(ServerSideDatatableView):
@@ -20,6 +23,8 @@ class ReceiptListView(ServerSideDatatableView):
     columns = ['upload_date_time', 'buying_date', "name_of_article", "name_of_store", "price",
                "days_of_warranty"]
 
+def document_overview(request):
+    return render(request, "basic/overview.html")
 
 def receipts_overview(request):
     return render(request, "basic/receipts.html")
@@ -29,30 +34,42 @@ def invoice_overview(request):
     return render(request, "basic/invoices.html")
 
 
-def handle_uploaded_file(param):
-    pass
-
-
-def upload_invoice(request):
+def upload_file(request):
     if request.method == "POST":
-        form = UploadInvoiceForm(request.POST, request.FILES)
+        upload_file_form = UploadFileForm(request.POST, request.FILES)
+        if upload_file_form.is_valid():
+            if upload_file_form.cleaned_data["store_original"]:
+                human_readable_id = get_human_readable_id()
+            upload_file_tmp_obj = upload_file_form.save()
+            file_type = ImageHandler.classify_image(upload_file_tmp_obj)
+            uploaded_document = UploadedDocument(file_obj=upload_file_tmp_obj, type=file_type, human_readable_id=human_readable_id)
+            uploaded_document.save()
+            form = DocumentSpecificationForm(instance=uploaded_document)
+        else:
+            specify_document_form = DocumentSpecificationForm(request.POST)
+            if specify_document_form.is_valid():
+                specify_document_form.save()
+            return render(request, 'basic/index.html')
+    else:
+        form = UploadFileForm
+    return render(request, 'basic/upload_document.html', {'form': form})
+
+
+def specify_document(request):
+    if request.method == "POST":
+        form = DocumentSpecificationForm(request.POST)
         if form.is_valid():
             form.save()
         return redirect("invoices")
     else:
-        form = UploadInvoiceForm
-    return render(request, 'basic/upload.html', {'form': form})
-
-def upload_receipt(request):
-    if request.method == "POST":
-        form = UploadReceiptForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-        return redirect("receipts")
-    else:
-        form = UploadReceiptForm
-    return render(request, 'basic/upload.html', {'form': form})
+        form = DocumentSpecificationForm
+        return render(request, 'basic/upload_document.html', {'form': form})
 
 
 def index(request):
     return render(request, "basic/index.html")
+
+
+class DocumentListView(ServerSideDatatableView):
+    queryset = UploadedDocument.objects.all()
+    columns = ['upload_date_time', 'type','deadline_date', 'price', "name_of_invoicer", "payed"]

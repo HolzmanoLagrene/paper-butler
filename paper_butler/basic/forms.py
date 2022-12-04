@@ -1,28 +1,24 @@
 from django import forms
+from django.core.files import File
 
-from basic.models import Invoice, Receipt
+from basic.models import UploadFile, UploadedDocument
 from django.forms import widgets
 
 
-class UploadInvoiceForm(forms.ModelForm):
-    class Meta:
-        model = Invoice
-        fields = ('file', 'deadline_date', 'price', 'name_of_invoicer', 'payed')
-        widgets = {
-            'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'})
-        }
+class UploadFileForm(forms.ModelForm):
+    store_original = forms.BooleanField()
 
-class UploadForm(forms.ModelForm):
     class Meta:
-        fields = ('type', 'deadline_date', 'price', 'name_of_invoicer', 'payed')
-        widgets = {
-            'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'})
-        }
+        model = UploadFile
+        fields = ('file',)
 
-class UploadReceiptForm(forms.ModelForm):
+
+class DocumentSpecificationForm(forms.ModelForm):
     class Meta:
-        model = Receipt
-        fields = ('file', 'buying_date', 'name_of_article', 'name_of_store', 'price','days_of_warranty')
+        model = UploadedDocument
+        exclude = []
         widgets = {
-            'buying_date': widgets.DateTimeInput(attrs={'type': 'date'})
+            'buying_date': widgets.DateTimeInput(attrs={'type': 'date'}),
+            'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'}),
+            'file_obj': forms.NumberInput(attrs={'class': 'form-control', 'readonly': True}),
         }

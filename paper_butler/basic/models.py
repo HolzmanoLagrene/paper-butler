@@ -1,11 +1,40 @@
 import datetime
+from django.utils.translation import gettext_lazy as _
 
 from django.db import models
 
 
+class DocumentType(models.TextChoices):
+    Unknown = 'UK', _('Unknown')
+    Invoice = 'IV', _('Invoice')
+    Receipt = 'RC', _('Receipt')
+
+class UploadFile(models.Model):
+    file = models.FileField(upload_to='temp/', null=False, blank=False)
+    binary_representation = models.BinaryField(null=True, blank=True)
+
+class UploadedDocument(models.Model):
+    upload_date_time = models.DateTimeField(auto_now_add=True)
+    file_obj = models.ForeignKey(UploadFile, on_delete=models.CASCADE, blank=False, null=False)
+    type = models.CharField(max_length=2, choices=DocumentType.choices, default=DocumentType.Unknown, blank=False, null=False)
+    deadline_date = models.DateTimeField(blank=True, null=True)
+    name_of_invoicer = models.CharField(max_length=100, blank=True, null=True)
+    payed = models.BooleanField(default=False, blank=True, null=True)
+    buying_date = models.DateTimeField(blank=True, null=True)
+    name_of_article = models.CharField(max_length=100, blank=True, null=True)
+    name_of_store = models.CharField(max_length=100, blank=True, null=True)
+    price = models.FloatField(blank=True, null=True)
+    days_of_warranty = models.PositiveBigIntegerField(default=365, blank=True, null=True)
+    human_readable_id  = models.CharField(max_length=100, blank=True, null=True)
+
+    @property
+    def date_of_expiry(self):
+        return self.buying_date + datetime.timedelta(days=self.days_of_warranty)
+
+
 class Invoice(models.Model):
     upload_date_time = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to='documents/', null=False, blank=False)
+    file_obj = models.ForeignKey(UploadFile, on_delete=models.CASCADE)
     deadline_date = models.DateTimeField()
     price = models.FloatField()
     name_of_invoicer = models.CharField(max_length=100)
@@ -14,7 +43,7 @@ class Invoice(models.Model):
 
 class Receipt(models.Model):
     upload_date_time = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to='receipts/', null=False, blank=False)
+    file_obj = models.ForeignKey(UploadFile, on_delete=models.CASCADE)
     buying_date = models.DateTimeField()
     name_of_article = models.CharField(max_length=100)
     name_of_store = models.CharField(max_length=100)
