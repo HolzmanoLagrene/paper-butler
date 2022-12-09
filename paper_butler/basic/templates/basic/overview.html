@@ -12,10 +12,7 @@
 				<tr>
 					<th>Upload Time</th>
 					<th>Document Type</th>
-					<th>Deadline Date</th>
-					<th>Price</th>
-					<th>Name of Invoicer</th>
-					<th>Payed?</th>
+					<th>Exists Phyiscally</th>
 				</tr>
 			</thead>
 			<tbody></tbody>
@@ -23,7 +20,7 @@
 
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-		<script language="javascript">
+		<script>
 			$(document).ready(function () {
 				$('#items-table').dataTable({
 					serverSide: true,
@@ -31,10 +28,7 @@
 					columns: [
                         {name: "upload_date_time", data: 0},
 						{name: "type", data: 1},
-                        {name: "deadline_date", data: 2},
-                        {name: "price", data: 3},
-                        {name: "name_of_invoicer", data: 4},
-                        {name: "payed", data: 5},
+                        {name: "physical_copy_Exists", data: 2},
                     ],
 				});
 			});

@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from .models import Receipt,Invoice
+from .models import Document
 
-admin.site.register(Receipt)
-admin.site.register(Invoice)
+admin.site.register(Document)

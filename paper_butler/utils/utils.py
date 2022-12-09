@@ -1,4 +1,7 @@
-from basic.models import UploadedDocument
+import re
+
+from basic.models import Document
+
 
 def increase_char(char):
     if char == "Z":
@@ -30,10 +33,13 @@ def increase_id(id):
     return new_char_part+new_number_part
 
 def get_human_readable_id():
-    if UploadedDocument.objects.count() == 0:
+    if Document.objects.filter(human_readable_id="").count() == 0:
         human_readable_id = "AAA000"
     else:
-        last_entry = UploadedDocument.objects.latest("human_readable_id")
+        last_entry = Document.objects.latest("human_readable_id")
         human_readable_id = last_entry.human_readable_id
     next_human_readable_id = increase_id(human_readable_id)
     return next_human_readable_id
+
+def is_human_readable_id(id):
+    return bool(re.match(r"[A-Z]{3}[0-9]{3}",id))

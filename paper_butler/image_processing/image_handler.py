@@ -2,8 +2,7 @@ import magic
 import img2pdf
 from django.core.files import File
 
-from basic.models import UploadFile, DocumentType
-from image_processing.utils import FileType
+from basic.models import DocumentType, Document
 
 
 class ImageHandler:
@@ -18,7 +17,7 @@ class ImageHandler:
         return image_obj
 
     @staticmethod
-    def classify_image(image_obj: UploadFile) -> DocumentType:
+    def classify_image(image_obj: Document) -> DocumentType:
         return DocumentType.Unknown
 
     @staticmethod

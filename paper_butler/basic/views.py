@@ -1,30 +1,20 @@
-import datetime
-
 from django.shortcuts import render, redirect
 from django_serverside_datatable.views import ServerSideDatatableView
 
-# Create your views here.
-from django.http import HttpResponse, HttpResponseRedirect
-
-from basic.forms import UploadFileForm, DocumentSpecificationForm
-from basic.models import Invoice, Receipt, UploadFile, DocumentType, UploadedDocument
+import utils.utils
+from basic.forms import UploadDocumentForm, SpecifyDocumentForm
+from basic.models import Document
 from image_processing.image_handler import ImageHandler
-from image_processing.utils import FileType
 from utils.utils import get_human_readable_id
 
 
-class InvoiceListView(ServerSideDatatableView):
-    queryset = Invoice.objects.all()
-    columns = ['upload_date_time', 'deadline_date', 'price', "name_of_invoicer", "payed"]
+def index(request):
+    return render(request, "basic/index.html")
 
-
-class ReceiptListView(ServerSideDatatableView):
-    queryset = Receipt.objects.all()
-    columns = ['upload_date_time', 'buying_date', "name_of_article", "name_of_store", "price",
-               "days_of_warranty"]
 
 def document_overview(request):
     return render(request, "basic/overview.html")
+
 
 def receipts_overview(request):
     return render(request, "basic/receipts.html")
@@ -34,42 +24,50 @@ def invoice_overview(request):
     return render(request, "basic/invoices.html")
 
 
-def upload_file(request):
-    if request.method == "POST":
-        upload_file_form = UploadFileForm(request.POST, request.FILES)
-        if upload_file_form.is_valid():
-            if upload_file_form.cleaned_data["store_original"]:
-                human_readable_id = get_human_readable_id()
-            upload_file_tmp_obj = upload_file_form.save()
-            file_type = ImageHandler.classify_image(upload_file_tmp_obj)
-            uploaded_document = UploadedDocument(file_obj=upload_file_tmp_obj, type=file_type, human_readable_id=human_readable_id)
-            uploaded_document.save()
-            form = DocumentSpecificationForm(instance=uploaded_document)
-        else:
-            specify_document_form = DocumentSpecificationForm(request.POST)
-            if specify_document_form.is_valid():
-                specify_document_form.save()
-            return render(request, 'basic/index.html')
+class DocumentListView(ServerSideDatatableView):
+    queryset = Document.objects.all()
+    columns = ['upload_date_time', 'type', 'physical_copy_exists']
+
+
+def change_document(request, id):
+    if utils.utils.is_human_readable_id(id):
+        document = Document.objects.filter(human_readable_id=id).get()
     else:
-        form = UploadFileForm
-    return render(request, 'basic/upload_document.html', {'form': form})
-
-
-def specify_document(request):
+        document = Document.objects.filter(id=id).get()
     if request.method == "POST":
-        form = DocumentSpecificationForm(request.POST)
+        form = SpecifyDocumentForm(request.POST, instance=document)
         if form.is_valid():
             form.save()
-        return redirect("invoices")
+        else:
+            print()
+        return redirect('/')
     else:
-        form = DocumentSpecificationForm
+        form = SpecifyDocumentForm(instance=document)
+        if document.human_readable_id:
+            id = document.human_readable_id
+            has_hr_id = True
+        else:
+            id = document.id
+            has_hr_id = False
+        return render(request, 'basic/change_document.html', {'form': form, 'id': id, 'has_hr_id': has_hr_id})
+
+
+def upload_document(request):
+    if request.method == "POST":
+        form = UploadDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.type = ImageHandler.classify_image(document.file_obj)
+            document.save()
+            if form.cleaned_data["store_original"]:
+                id = get_human_readable_id()
+                document.human_readable_id = id
+            else:
+                id = document.id
+            document.save()
+        else:
+            print()
+        return redirect(f"change_document/{id}")
+    else:
+        form = UploadDocumentForm
         return render(request, 'basic/upload_document.html', {'form': form})
-
-
-def index(request):
-    return render(request, "basic/index.html")
-
-
-class DocumentListView(ServerSideDatatableView):
-    queryset = UploadedDocument.objects.all()
-    columns = ['upload_date_time', 'type','deadline_date', 'price', "name_of_invoicer", "payed"]

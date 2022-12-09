@@ -1,0 +1,8 @@
+{% if has_hr_id %}
+<p>You can store this document under the following ID: {{id}}</p>
+{% endif %}
+<form action={{ id }} method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit"> Submit</button>
+</form>
