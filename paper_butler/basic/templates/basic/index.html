@@ -8,7 +8,14 @@
 </head>
 <h2>Paper Butler</h2>
 <body>
-	{% include "basic/topbar.html" %}
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+</ul>
+{% endif %}
+{% include "basic/topbar.html" %}
 {% include "basic/overview.html" %}
 </body>
 </html>

@@ -15,28 +15,57 @@ class UploadDocumentForm(forms.ModelForm):
 class SpecifyDocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        exclude = ('file_obj', 'human_readable_id',)
+        exclude = ('file_obj', 'human_readable_id', 'used_for_training',)
         widgets = {
             'buying_date': widgets.DateTimeInput(attrs={'type': 'date'}),
             'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'})
         }
 
 
-class SpecifyDocumentAsInvoiceForm(forms.ModelForm):
+class SpecifyDocumentAsUnknownForm(forms.ModelForm):
     class Meta:
         model = Document
-        exclude = ('file_obj',)
+        fields = ('type',)
+
+
+class SpecifyDocumentAsInvoiceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.Meta.required:
+            self.fields[field].required = True
+
+    class Meta:
+        model = Document
+        exclude = (
+            'file_obj', 'buying_date', 'name_of_article', 'name_of_store', 'human_readable_id', 'used_for_training',)
+        required = (
+            'deadline_date',
+            'name_of_invoicer',
+            'payed',
+            'price',
+        )
         widgets = {
-            'buying_date': widgets.DateTimeInput(attrs={'type': 'date'}),
             'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'})
         }
 
 
 class SpecifyDocumentAsReceiptForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.Meta.required:
+            self.fields[field].required = True
+
     class Meta:
         model = Document
-        exclude = ('file_obj',)
+        exclude = ('file_obj', 'deadline_date', 'name_of_invoicer', 'payed', 'human_readable_id', 'used_for_training',)
+        required = (
+            'buying_date',
+            'name_of_article',
+            'name_of_store',
+            'days_of_warranty',
+        )
         widgets = {
             'buying_date': widgets.DateTimeInput(attrs={'type': 'date'}),
-            'deadline_date': widgets.DateTimeInput(attrs={'type': 'date'})
         }

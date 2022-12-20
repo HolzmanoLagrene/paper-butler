@@ -10,5 +10,6 @@ urlpatterns = [
     path('receipts', views.receipts_overview, name='receipts'),
     path('overview', views.document_overview, name='overview'),
     path('document_overview', views.DocumentListView.as_view()),
+    path('train', views.train,name="train")
 
 ]

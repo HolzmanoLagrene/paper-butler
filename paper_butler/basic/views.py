@@ -1,10 +1,16 @@
+import json
+
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django_serverside_datatable.views import ServerSideDatatableView
+from django.http import JsonResponse
 
 import utils.utils
-from basic.forms import UploadDocumentForm, SpecifyDocumentForm
-from basic.models import Document
+from basic.forms import UploadDocumentForm, SpecifyDocumentForm, SpecifyDocumentAsUnknownForm, \
+    SpecifyDocumentAsReceiptForm, SpecifyDocumentAsInvoiceForm
+from basic.models import Document, DocumentType
 from image_processing.image_handler import ImageHandler
+from image_processing.setup_ml_data import run_training_cylce
 from utils.utils import get_human_readable_id
 
 
@@ -26,30 +32,48 @@ def invoice_overview(request):
 
 class DocumentListView(ServerSideDatatableView):
     queryset = Document.objects.all()
-    columns = ['upload_date_time', 'type', 'physical_copy_exists']
+    columns = ['upload_date_time', 'type']
+    # columns = ['upload_date_time', 'type', 'physical_copy_exists']
 
 
 def change_document(request, id):
     if utils.utils.is_human_readable_id(id):
-        document = Document.objects.filter(human_readable_id=id).get()
+        try:
+            document = Document.objects.filter(human_readable_id=id).get()
+            has_human_readable_id = True
+            form_id = document.human_readable_id
+        except Exception as e:
+            messages.error(request, f"There is no document with id {id}")
+            return redirect("/")
     else:
-        document = Document.objects.filter(id=id).get()
+        try:
+            document = Document.objects.filter(id=id).get()
+            has_human_readable_id = False
+            form_id = document.id
+        except Exception as e:
+            messages.error(request, f"There is no document with id {id}")
+            return redirect("/")
+    if request.method == "PUT":
+        type = json.loads(request.body.decode("utf8"))["type"]
+        document.type = type
+        document.save()
+        return JsonResponse({'success': True})
     if request.method == "POST":
         form = SpecifyDocumentForm(request.POST, instance=document)
         if form.is_valid():
             form.save()
         else:
-            print()
+            messages.error(request, f"There was an error with the document")
         return redirect('/')
     else:
-        form = SpecifyDocumentForm(instance=document)
-        if document.human_readable_id:
-            id = document.human_readable_id
-            has_hr_id = True
+        if document.type == DocumentType.Unknown:
+            form = SpecifyDocumentAsUnknownForm(instance=document)
+        elif document.type == DocumentType.Receipt:
+            form = SpecifyDocumentAsReceiptForm(instance=document)
         else:
-            id = document.id
-            has_hr_id = False
-        return render(request, 'basic/change_document.html', {'form': form, 'id': id, 'has_hr_id': has_hr_id})
+            form = SpecifyDocumentAsInvoiceForm(instance=document)
+        return render(request, 'basic/change_document.html',
+                      {'form': form, 'id': form_id, 'has_hr_id': has_human_readable_id})
 
 
 def upload_document(request):
@@ -66,8 +90,14 @@ def upload_document(request):
                 id = document.id
             document.save()
         else:
-            print()
+            messages.error(request, f"There was an error with thid document")
+            return redirect("/")
         return redirect(f"change_document/{id}")
     else:
         form = UploadDocumentForm
         return render(request, 'basic/upload_document.html', {'form': form})
+
+
+def train(request):
+    run_training_cylce()
+    return redirect("/")

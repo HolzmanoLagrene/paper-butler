@@ -33,7 +33,7 @@ def increase_id(id):
     return new_char_part+new_number_part
 
 def get_human_readable_id():
-    if Document.objects.filter(human_readable_id="").count() == 0:
+    if Document.objects.exclude(human_readable_id=None).count() == 0:
         human_readable_id = "AAA000"
     else:
         last_entry = Document.objects.latest("human_readable_id")
