@@ -1,0 +1,18 @@
+<style>
+    video {
+        /* override other styles to make responsive */
+        width: 100% !important;
+        height: 100% !important;
+    }
+</style>
+<video id="player" autoplay playsinline></video>
+<script>
+    const player = document.getElementById('player');
+    const constraints = {
+        video: true,
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+        player.srcObject = stream;
+    });
+</script>
+
