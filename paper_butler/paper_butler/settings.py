@@ -25,19 +25,22 @@ SECRET_KEY = 'django-insecure-zr!e=+vdu_+$2)xjo1g@_-ka*#m&7qlfh3@4#pvpr-a4gfx)q8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'basic.apps.BasicConfig',
+    'scanner.apps.ScannerConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'django_extensions',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -69,7 +72,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'paper_butler.wsgi.application'
-
+CHANNEL_LAYERS={
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases

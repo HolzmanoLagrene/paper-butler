@@ -101,3 +101,7 @@ def upload_document(request):
 def train(request):
     run_training_cylce()
     return redirect("/")
+
+
+def list(request):
+    return render(request, 'basic/list.html')
