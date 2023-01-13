@@ -16,12 +16,12 @@ import scanner.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paper_butler.settings')
 
-#application = get_asgi_application()
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            scanner.routing.websocket_urlpatterns
-        )
-    ),
-})
+application = get_asgi_application()
+# application = ProtocolTypeRouter({
+#     "http": get_asgi_application(),
+#     "websocket": AuthMiddlewareStack(
+#         URLRouter(
+#             scanner.routing.websocket_urlpatterns
+#         )
+#     ),
+# })

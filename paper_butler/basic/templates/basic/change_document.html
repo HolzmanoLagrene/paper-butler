@@ -1,10 +1,11 @@
 {% if has_hr_id %}
 <p>This document is stored with the following ID: {{id}}</p>
 {% endif %}
+{% load crispy_forms_tags %}
 <form id="change_document_form" action={{ id }} method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit"> Submit</button>
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary"> Submit</button>
 </form>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <script>

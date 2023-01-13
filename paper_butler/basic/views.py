@@ -32,7 +32,7 @@ def invoice_overview(request):
 
 class DocumentListView(ServerSideDatatableView):
     queryset = Document.objects.all()
-    columns = ['upload_date_time', 'type']
+    columns = ['id','upload_date_time', 'type']
     # columns = ['upload_date_time', 'type', 'physical_copy_exists']
 
 
@@ -72,9 +72,7 @@ def change_document(request, id):
             form = SpecifyDocumentAsReceiptForm(instance=document)
         else:
             form = SpecifyDocumentAsInvoiceForm(instance=document)
-        return render(request, 'basic/change_document.html',
-                      {'form': form, 'id': form_id, 'has_hr_id': has_human_readable_id})
-
+    return render(request, 'basic/change_document.html', {'modal_state':'block','form': form, 'id': form_id, 'has_hr_id': has_human_readable_id})
 
 def upload_document(request):
     if request.method == "POST":
